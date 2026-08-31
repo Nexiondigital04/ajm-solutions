@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AJM Solutions — Under Construction</title>
+<meta name="description" content="AJM Solutions – we are rebuilding something great. Stay tuned.">
+<meta name="theme-color" content="#04070c">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="AJM Solutions — Under Construction">
+<meta property="og:description" content="We are rebuilding something great. Stay tuned.">
+<meta property="og:image" content="assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="assets/img/icon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/img/icon-512.png" sizes="512x512" type="image/png">
+<link rel="apple-touch-icon" href="assets/img/icon-180.png">
+<link rel="manifest" href="site.webmanifest">
+
+<link rel="preload" as="image" type="image/webp" href="assets/img/bg.webp"
+      media="(min-aspect-ratio: 3/4)">
+<link rel="preload" as="image" type="image/webp" href="assets/img/bg-mobile.webp"
+      media="(max-aspect-ratio: 3/4)">
+<link rel="preload" as="font" type="font/woff2" crossorigin
+      href="assets/fonts/orbitron-500-latin.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin
+      href="assets/fonts/inter-300-latin.woff2">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<div class="bg" aria-hidden="true"></div>
+
+<main class="hero">
+  <div class="stack">
+
+    <div class="mark">
+
+      <!-- Energy Trail. Die Kontur ist 1:1 aus docs/quellen/ajm-logo-vector.svg
+           uebernommen (tools/logo-outline.mjs) — fuenf Teilpfade: A-Kette,
+           blaues J, M-Flaeche und die zwei kleinen Gipfel. Die viewBox ist so
+           gesetzt, dass sie deckungsgleich auf ajm-mark.png liegt.
+           Der ganze Layer liegt per z-index hinter dem Signet, sichtbar ist
+           dadurch nur die aeussere Haelfte der Striche = die Leuchtkante. -->
+      <svg class="mark__trail" viewBox="0 0 1000 858.43"
+           aria-hidden="true" focusable="false">
+        <defs>
+          <filter id="ajmGlowRim"  x="-15%" y="-15%" width="130%" height="130%">
+            <feGaussianBlur stdDeviation="12"/>
+          </filter>
+          <filter id="ajmGlowWide" x="-15%" y="-15%" width="130%" height="130%">
+            <feGaussianBlur stdDeviation="20"/>
+          </filter>
+          <filter id="ajmGlowSoft" x="-15%" y="-15%" width="130%" height="130%">
+            <feGaussianBlur stdDeviation="9"/>
+          </filter>
+          <filter id="ajmGlowMid"  x="-15%" y="-15%" width="130%" height="130%">
+            <feGaussianBlur stdDeviation="4"/>
+          </filter>
+          <filter id="ajmGlowHead" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="4"/>
+          </filter>
+          <filter id="ajmGlowDot"  x="-25%" y="-25%" width="150%" height="150%">
+            <feGaussianBlur stdDeviation="14"/>
+          </filter>
+
+          <!-- A-Kette. Umfang 2422 -->
+          <path id="ajmA" pathLength="1000"
+                d="M 501.23 265.23 L 539.84 329.7 L 539.7 329.94 L 607.52 443.42 L 607.71 443.08 L 644.6 504.69 L 702.81 601.92 L 774.06 475 L 774.88 473.53 L 748.9 429 L 717.4 375 L 716.96 375.77 L 680.81 312.92 L 680.99 312.6 L 679.48 310.01 L 654.62 267.4 L 654.57 267.32 L 614.97 198.49 L 502.03 2.19 L 501 4.11 L 500 2.4 L 251.1 429 L 127.94 640.08 L 290.9 640.08 Z"/>
+          <!-- blaues J. Umfang 1789 -->
+          <path id="ajmJ" pathLength="1000"
+                d="M 504.56 624.06 L 504.61 624.16 L 568.42 510.36 L 568.05 509.68 L 568.11 509.57 L 547.36 471.49 L 502.97 389.54 L 460.49 469.27 L 310.56 737.52 L 236.23 737.52 L 261.57 688.63 L 99.32 689.12 L 97.44 692.35 L 2.19 855.6 L 376.04 855.6 L 376.11 855.47 L 422.76 771.44 L 494 643.08 Z"/>
+          <!-- M-Flaeche. Umfang 1643 -->
+          <path id="ajmM" pathLength="1000"
+                d="M 812.88 538.66 L 811.8 540.59 L 778.82 599.34 L 696.28 746.39 L 594.74 558.96 L 529.98 671.14 L 629.73 855.9 L 747.43 856.05 L 776.75 805.27 L 806.18 754.29 L 835.61 805.27 L 863.99 854.42 L 864.75 855.6 L 997.81 855.6 Z"/>
+
+          <!-- alle fuenf Konturen, nur fuer die ruhende Leuchtkante -->
+          <path id="ajmRim"
+                d="M 501.23 265.23 L 539.84 329.7 L 539.7 329.94 L 607.52 443.42 L 607.71 443.08 L 644.6 504.69 L 702.81 601.92 L 774.06 475 L 774.88 473.53 L 748.9 429 L 717.4 375 L 716.96 375.77 L 680.81 312.92 L 680.99 312.6 L 679.48 310.01 L 654.62 267.4 L 654.57 267.32 L 614.97 198.49 L 502.03 2.19 L 501 4.11 L 500 2.4 L 251.1 429 L 127.94 640.08 L 290.9 640.08 Z
+                   M 504.56 624.06 L 504.61 624.16 L 568.42 510.36 L 568.05 509.68 L 568.11 509.57 L 547.36 471.49 L 502.97 389.54 L 460.49 469.27 L 310.56 737.52 L 236.23 737.52 L 261.57 688.63 L 99.32 689.12 L 97.44 692.35 L 2.19 855.6 L 376.04 855.6 L 376.11 855.47 L 422.76 771.44 L 494 643.08 Z
+                   M 812.88 538.66 L 811.8 540.59 L 778.82 599.34 L 696.28 746.39 L 594.74 558.96 L 529.98 671.14 L 629.73 855.9 L 747.43 856.05 L 776.75 805.27 L 806.18 754.29 L 835.61 805.27 L 863.99 854.42 L 864.75 855.6 L 997.81 855.6 Z
+                   M 804.89 812.5 L 792.26 834.37 L 779.63 856.24 L 804.89 856.24 L 830.14 856.24 L 817.52 834.37 Z
+                   M 501.43 727.02 L 538.29 790.86 L 575.15 854.71 L 501.43 854.71 L 427.7 854.71 L 464.57 790.86 Z"/>
+        </defs>
+
+        <!-- ruhende Leuchtkante entlang aller Konturen -->
+        <use class="rim rim--glow" href="#ajmRim" filter="url(#ajmGlowRim)"/>
+        <use class="rim rim--mid"  href="#ajmRim" filter="url(#ajmGlowMid)"/>
+        <use class="rim rim--line" href="#ajmRim"/>
+
+        <!-- Drei Lichtpunkte, je einer pro grosser Kontur. Getrennte Pfade,
+             weil SVG das Strichmuster an jedem Teilpfad neu ansetzt — in einem
+             gemeinsamen Pfad kaeme pro Kontur ein eigener Punkt heraus statt
+             drei ueber das Ganze. -->
+        <g class="comet comet--a">
+          <use class="trail trail--t7" href="#ajmA" filter="url(#ajmGlowWide)"/>
+          <use class="trail trail--t6" href="#ajmA" filter="url(#ajmGlowSoft)"/>
+          <use class="trail trail--t5" href="#ajmA" filter="url(#ajmGlowMid)"/>
+          <use class="trail trail--t4" href="#ajmA"/>
+          <use class="trail trail--t3" href="#ajmA"/>
+          <use class="trail trail--t2" href="#ajmA"/>
+          <use class="trail trail--t1" href="#ajmA" filter="url(#ajmGlowHead)"/>
+          <use class="trail trail--h1" href="#ajmA" filter="url(#ajmGlowDot)"/>
+          <use class="trail trail--h2" href="#ajmA" filter="url(#ajmGlowHead)"/>
+          <use class="trail trail--h3" href="#ajmA"/>
+        </g>
+        <g class="comet comet--j">
+          <use class="trail trail--t7" href="#ajmJ" filter="url(#ajmGlowWide)"/>
+          <use class="trail trail--t6" href="#ajmJ" filter="url(#ajmGlowSoft)"/>
+          <use class="trail trail--t5" href="#ajmJ" filter="url(#ajmGlowMid)"/>
+          <use class="trail trail--t4" href="#ajmJ"/>
+          <use class="trail trail--t3" href="#ajmJ"/>
+          <use class="trail trail--t2" href="#ajmJ"/>
+          <use class="trail trail--t1" href="#ajmJ" filter="url(#ajmGlowHead)"/>
+          <use class="trail trail--h1" href="#ajmJ" filter="url(#ajmGlowDot)"/>
+          <use class="trail trail--h2" href="#ajmJ" filter="url(#ajmGlowHead)"/>
+          <use class="trail trail--h3" href="#ajmJ"/>
+        </g>
+        <g class="comet comet--m">
+          <use class="trail trail--t7" href="#ajmM" filter="url(#ajmGlowWide)"/>
+          <use class="trail trail--t6" href="#ajmM" filter="url(#ajmGlowSoft)"/>
+          <use class="trail trail--t5" href="#ajmM" filter="url(#ajmGlowMid)"/>
+          <use class="trail trail--t4" href="#ajmM"/>
+          <use class="trail trail--t3" href="#ajmM"/>
+          <use class="trail trail--t2" href="#ajmM"/>
+          <use class="trail trail--t1" href="#ajmM" filter="url(#ajmGlowHead)"/>
+          <use class="trail trail--h1" href="#ajmM" filter="url(#ajmGlowDot)"/>
+          <use class="trail trail--h2" href="#ajmM" filter="url(#ajmGlowHead)"/>
+          <use class="trail trail--h3" href="#ajmM"/>
+        </g>
+      </svg>
+
+      <img src="assets/img/ajm-mark.png" alt="AJM Solutions Signet">
+    </div>
+
+    <h1 class="wordmark">
+      <img src="assets/img/ajm-wordmark.png" alt="AJM Solutions">
+    </h1>
+
+    <div class="rule rule--dot"><i></i></div>
+
+    <p class="status"><span>UNDER</span> CONSTRUCTION</p>
+
+    <div class="rule rule--dash">
+      <div class="dashes"><i></i><i></i><i></i><i></i></div>
+    </div>
+
+    <p class="lede">
+      We are rebuilding something great.<br>
+      Stay tuned.
+    </p>
+
+  </div>
+</main>
+
+</body>
+</html>

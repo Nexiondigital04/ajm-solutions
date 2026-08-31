@@ -1,0 +1,419 @@
+/* ==========================================================================
+   AJM Solutions — Under Construction
+
+   Die Vorlage ist 1717 x 916 gross. Alle Groessen und Abstaende sind in
+   dieser Referenz gerechnet und ueber die Einheit --u proportional
+   skaliert: 1u = 1px der Vorlage.
+   ========================================================================== */
+
+:root {
+  /* 100/1300 vw  bzw.  100/916 vh  — der kleinere Wert gewinnt */
+  --u: min(0.132vw, 0.1092vh);
+
+  --c-bg:        #04070c;
+  --c-text:      #eef3f8;
+  --c-text-dim:  #97a1ad;
+  --c-blue:      #3d9fd6;
+
+  --ff-display: "Orbitron", "Michroma", "Segoe UI", system-ui, sans-serif;
+  --ff-body:    "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--ff-body);
+  font-weight: 300;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, p { margin: 0; }
+
+img { display: block; max-width: 100%; }
+
+/* ==========================================================================
+   Hintergrund — Originalgrafik, formatfuellend
+   ========================================================================== */
+
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--c-bg) center / cover no-repeat;
+
+  /* Erst PNG als Rueckfallebene, dann WebP fuer alle, die image-set() koennen.
+     WebP spart hier den Grossteil des Seitengewichts (1227 → 41 kB) bei einer
+     mittleren Abweichung von 0,8/255 — nicht sichtbar. */
+  background-image: url("../img/bg.png");
+  background-image: image-set(url("../img/bg.webp") type("image/webp"),
+                              url("../img/bg.png")  type("image/png"));
+}
+
+/* Eigene Hochkant-Grafik. Umgeschaltet wird nach Seitenverhaeltnis, nicht nach
+   Geraetebreite: entscheidend ist, ob das Querformat (1.87) oder das
+   Hochformat (0.46) weniger beschnitten wird. Die Grenze 3/4 liegt dazwischen. */
+@media (max-aspect-ratio: 3 / 4) {
+  .bg {
+    background-image: url("../img/bg-mobile.png");
+    background-image: image-set(url("../img/bg-mobile.webp") type("image/webp"),
+                                url("../img/bg-mobile.png")  type("image/png"));
+  }
+}
+
+/* ==========================================================================
+   Hero
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: calc(24 * var(--u)) calc(20 * var(--u));
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  /* Der Block sitzt in der Vorlage minimal oberhalb der Mitte */
+  margin-top: calc(-47 * var(--u));
+}
+
+/* --- Signet ------------------------------------------------------------- */
+
+.mark {
+  position: relative;
+  isolation: isolate;
+  line-height: 0;
+}
+
+.mark img {
+  /* ausgemessen: Signet ist in der Vorlage 398u hoch (Zuschnitt hat Rand) */
+  height: calc(366 * var(--u));
+  width: auto;
+}
+
+/* Lichthof dahinter */
+.mark::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: calc(760 * var(--u));
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  z-index: -1;
+  /* Laeuft bis 100% aus — mit hartem Ende bei 72% zeichnet sich im
+     Differenzbild ein sichtbarer Ring ab.
+     Deutlich zurueckgenommen und kuehler als zuvor: der alte, helle Hof hat
+     die blaue Leuchtkante ueberstrahlt und entsaettigt. */
+  background: radial-gradient(circle closest-side,
+              rgba(196, 222, 245, .19) 0%,
+              rgba(150, 188, 224, .11) 26%,
+              rgba(115, 158, 205, .055) 44%,
+              rgba(80, 125, 178, .025) 64%,
+              rgba(60, 100, 145, .01) 82%,
+              transparent 100%);
+  pointer-events: none;
+}
+
+/* --- Energy Trail -------------------------------------------------------
+   Blaue Leuchtkante entlang der gesamten Logokontur, darauf drei helle
+   Lichtpunkte mit Schweif. Die Konturen sind 1:1 aus der Originaldatei
+   uebernommen (siehe tools/logo-outline.mjs), nicht nachgezeichnet.
+
+   Aufbau je Lichtpunkt: vier Striche auf demselben Pfad. Jeder zeigt per
+   stroke-dasharray nur ein Segment; die Segmentlaengen sind gestaffelt und so
+   versetzt, dass alle dieselbe VORDERkante haben und nach hinten
+   unterschiedlich weit reichen. Uebereinander ergibt das den Verlauf vom
+   hellen Kopf zum ausblendenden Schweif — einen Verlauf entlang des Pfades
+   kann SVG-Stroke selbst nicht.
+
+   pathLength="1000" normiert jede Kontur, alle Werte sind also Promille der
+   jeweiligen Kontur und unabhaengig von der tatsaechlichen Geometrie.       */
+
+.mark__trail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;               /* viewBox deckt sich mit ajm-mark.png */
+  z-index: -1;                /* hinter dem Signet, vor dem Lichthof */
+  overflow: visible;          /* Glow darf ueber die viewBox hinaus */
+  pointer-events: none;
+}
+
+.rim,
+.trail {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --- ruhende Leuchtkante --- */
+
+/* Strichstaerken sind viewBox-Einheiten (1000 = Logobreite). Weil die Kontur
+   exakt auf der Logokante liegt und der Layer dahinter, ist nur die aeussere
+   Haelfte sichtbar — die Werte sind also doppelt so gross wie die gewuenschte
+   Kantenbreite. */
+/* Drei Ebenen von aussen nach innen: weicher Bloom, blauer Koerper, fast
+   weisser Kern direkt auf der Kontur. Der scharfe Kern traegt den Eindruck —
+   ein breiter weicher Schein allein wirkt nur wie ein Schleier. */
+.rim--glow {
+  stroke: #1878e0;
+  stroke-width: 40;
+  opacity: .45;
+}
+
+/* traegt die Farbe: eng und voll gesaettigt, nicht aufgehellt */
+.rim--mid {
+  stroke: #1f8fff;
+  stroke-width: 16;
+  opacity: 1;
+}
+
+/* haarfein — sonst wird aus der Linie ein blasser Saum */
+.rim--line {
+  stroke: #ffffff;
+  stroke-width: 5;
+  opacity: 1;
+}
+
+/* --- die drei Lichtpunkte ---
+   Je einer pro grosser Kontur. Jeder Pfad hat sein eigenes pathLength="1000",
+   die Dash-Werte sind also Promille der jeweiligen Kontur. Damit alle drei
+   gleich schnell laufen, ist die Dauer proportional zum Umfang:
+   A 2422 → 9s, J 1789 → 6.65s, M 1643 → 6.1s. */
+
+.trail {
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.comet--a .trail { animation-duration: 9s; }
+.comet--j .trail { animation-duration: 6.65s; }
+.comet--m .trail { animation-duration: 6.1s; }
+
+/* Sieben statt vier Ebenen. Alle teilen sich die Vorderkante und reichen
+   unterschiedlich weit nach hinten; sichtbar ist immer die oberste noch
+   vorhandene. Bei jedem Ebenen-Ende springt die Farbe also einen Schritt —
+   mit vier Ebenen waren diese Schritte als Kanten sichtbar, mit sieben eng
+   gestaffelten liegen sie unter der Wahrnehmungsschwelle.
+   Farbe, Breite und Deckkraft laufen dabei gemeinsam von weiss nach blau. */
+.trail--t1 { stroke: #ffffff; stroke-width: 13; opacity: 1;   stroke-dasharray:   7 993; animation-name: trail-t1; }
+.trail--t2 { stroke: #dcf2ff; stroke-width: 12; opacity: .95; stroke-dasharray:  17 983; animation-name: trail-t2; }
+.trail--t3 { stroke: #aadeff; stroke-width: 13; opacity: .9;  stroke-dasharray:  32 968; animation-name: trail-t3; }
+.trail--t4 { stroke: #78c8ff; stroke-width: 16; opacity: .82; stroke-dasharray:  55 945; animation-name: trail-t4; }
+.trail--t5 { stroke: #4dafff; stroke-width: 21; opacity: .72; stroke-dasharray:  88 912; animation-name: trail-t5; }
+.trail--t6 { stroke: #2f9aff; stroke-width: 32; opacity: .58; stroke-dasharray: 130 870; animation-name: trail-t6; }
+.trail--t7 { stroke: #1f8fff; stroke-width: 70; opacity: .34; stroke-dasharray: 185 815; animation-name: trail-t7; }
+
+/* Der Lichtpunkt an der Spitze. Sehr kurzes Segment auf breitem Strich mit
+   runden Enden — die Kappen ragen um die halbe Strichbreite ueber das Segment
+   hinaus, aus dem Strich wird dadurch ein runder Punkt. Er liegt zuoberst,
+   damit ihn der Schweif nicht zudeckt. */
+.trail--h1 { stroke: #6cc4ff; stroke-width: 58; opacity: .6; stroke-dasharray: 4 996; animation-name: trail-h1; }
+.trail--h2 { stroke: #ffffff; stroke-width: 18; opacity: 1;  stroke-dasharray: 3 997; animation-name: trail-h2; }
+.trail--h3 { stroke: #ffffff; stroke-width:  7; opacity: 1;  stroke-dasharray: 2 998; animation-name: trail-h3; }
+
+@keyframes trail-h1 { from { stroke-dashoffset:   4; } to { stroke-dashoffset: -996; } }
+@keyframes trail-h2 { from { stroke-dashoffset:   3; } to { stroke-dashoffset: -997; } }
+@keyframes trail-h3 { from { stroke-dashoffset:   2; } to { stroke-dashoffset: -998; } }
+
+/* Startwert = eigene Segmentlaenge, Ziel = Startwert minus Pfadlaenge.
+   Dadurch liegt die Vorderkante aller Striche immer an derselben Stelle. */
+@keyframes trail-t1 { from { stroke-dashoffset:   7; } to { stroke-dashoffset: -993; } }
+@keyframes trail-t2 { from { stroke-dashoffset:  17; } to { stroke-dashoffset: -983; } }
+@keyframes trail-t3 { from { stroke-dashoffset:  32; } to { stroke-dashoffset: -968; } }
+@keyframes trail-t4 { from { stroke-dashoffset:  55; } to { stroke-dashoffset: -945; } }
+@keyframes trail-t5 { from { stroke-dashoffset:  88; } to { stroke-dashoffset: -912; } }
+@keyframes trail-t6 { from { stroke-dashoffset: 130; } to { stroke-dashoffset: -870; } }
+@keyframes trail-t7 { from { stroke-dashoffset: 185; } to { stroke-dashoffset: -815; } }
+
+/* Silberne Lichtkante oben links + Schlagschatten.
+   Bewusst zwei drop-shadows statt einer versetzten Kopie: der Versatz legt
+   nur einen schmalen Saum an die Kanten frei, die Negativflaechen des Logos
+   bleiben frei fuer den Lichthof. */
+/* Kein silberner Saum mehr: er lag genau auf dem schmalen Band, in dem die
+   blaue Leuchtkante aus dem Logo herausschaut, und hat sie verdeckt. Die
+   Kante uebernimmt jetzt der Trail-Layer. Schlagschatten bleibt fuer Tiefe. */
+.mark img {
+  filter:
+    drop-shadow(calc(.8 * var(--u)) calc(1 * var(--u)) 0 rgba(0, 0, 0, .45))
+    drop-shadow(0 calc(10 * var(--u)) calc(22 * var(--u)) rgba(0, 0, 0, .5));
+}
+
+/* --- Wortmarke ---------------------------------------------------------- */
+
+.wordmark {
+  margin-top: calc(19 * var(--u));
+  line-height: 0;
+}
+
+.wordmark img {
+  width: calc(520 * var(--u));
+  filter: drop-shadow(0 0 calc(18 * var(--u)) rgba(120, 170, 220, .22));
+}
+
+/* --- Trennlinien -------------------------------------------------------- */
+
+.rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(10 * var(--u));
+}
+
+.rule::before,
+.rule::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+}
+
+.rule--dot {
+  margin-top: calc(30 * var(--u));
+  width: calc(300 * var(--u));
+}
+
+/* deutlich zarter als die untere Linie — so ist es in der Vorlage */
+.rule--dot::before { background: linear-gradient(90deg,  transparent, rgba(150, 175, 200, .13)); }
+.rule--dot::after  { background: linear-gradient(270deg, transparent, rgba(150, 175, 200, .13)); }
+
+.rule--dot i {
+  width: calc(4 * var(--u));
+  height: calc(4 * var(--u));
+  min-width: 2px;
+  min-height: 2px;
+  background: var(--c-blue);
+  rotate: 45deg;
+  box-shadow: 0 0 calc(8 * var(--u)) rgba(61, 159, 214, .9);
+}
+
+.rule--dash {
+  margin-top: calc(17 * var(--u));
+  width: calc(500 * var(--u));
+}
+
+/* kraeftiger als die obere Linie — ausgemessener heller Kern: 464u */
+.rule--dash::before { background: linear-gradient(90deg,  transparent, rgba(140, 165, 190, .52)); }
+.rule--dash::after  { background: linear-gradient(270deg, transparent, rgba(140, 165, 190, .52)); }
+
+/* Der Block misst in der Vorlage rund 105u in der Breite */
+.dashes {
+  display: flex;
+  align-items: center;
+  gap: calc(5 * var(--u));
+}
+
+.dashes i {
+  height: calc(4 * var(--u));
+  min-height: 2px;
+  background: rgba(150, 175, 200, .55);
+  transform: skewX(-26deg);
+}
+
+.dashes i:nth-child(1) { width: calc(21 * var(--u)); }
+.dashes i:nth-child(2) { width: calc(34 * var(--u)); background: rgba(190, 212, 234, .85); }
+.dashes i:nth-child(3) { width: calc(22 * var(--u)); }
+.dashes i:nth-child(4) { width: calc(12 * var(--u)); background: rgba(150, 175, 200, .35); }
+
+/* --- Statuszeile -------------------------------------------------------- */
+
+.status {
+  margin-top: calc(26 * var(--u));
+  font-family: var(--ff-display);
+  font-weight: 500;
+  /* Versalhoehe 18u wie in der Vorlage; Orbitron laeuft enger als die
+     Original-Schrift, die Differenz faengt die Laufweite auf (Zeile 458u breit) */
+  font-size: calc(24.5 * var(--u));
+  letter-spacing: .39em;
+  text-indent: .39em;              /* gleicht die Spur hinter dem letzten Zeichen aus */
+  line-height: 1.25;
+  white-space: nowrap;
+  color: var(--c-text);
+  text-shadow: 0 0 calc(26 * var(--u)) rgba(120, 170, 220, .25);
+}
+
+.status span {
+  color: var(--c-blue);
+  text-shadow: 0 0 calc(20 * var(--u)) rgba(47, 163, 255, .45);
+}
+
+/* --- Fliesstext --------------------------------------------------------- */
+
+.lede {
+  margin-top: calc(22 * var(--u));
+  font-size: calc(20 * var(--u));
+  line-height: calc(30 * var(--u));
+  color: var(--c-text-dim);
+}
+
+/* ==========================================================================
+   Bewegung
+   ========================================================================== */
+
+@keyframes halo-breathe {
+  0%, 100% { opacity: .9;  transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.05); }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(calc(16 * var(--u))); }
+  to   { opacity: 1; transform: none; }
+}
+
+.mark::before { animation: halo-breathe 7s ease-in-out infinite; }
+
+.stack > * { animation: rise .9s cubic-bezier(.22, .8, .3, 1) both; }
+.stack > *:nth-child(1) { animation-delay: .05s; }
+.stack > *:nth-child(2) { animation-delay: .18s; }
+.stack > *:nth-child(3) { animation-delay: .28s; }
+.stack > *:nth-child(4) { animation-delay: .36s; }
+.stack > *:nth-child(5) { animation-delay: .44s; }
+.stack > *:nth-child(6) { animation-delay: .52s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+
+  /* Nur die laufenden Lichtpunkte entfallen — ein eingefrorener Komet waere
+     ein sinnloser heller Fleck. Die ruhende Leuchtkante bewegt sich ohnehin
+     nicht und bleibt deshalb erhalten. */
+  .comet { display: none; }
+}
+
+/* ==========================================================================
+   Kleine Viewports — NOTNAGEL, kein ausgearbeitetes Responsive-Verhalten.
+
+   Der Fokus liegt aktuell allein auf der Desktop-Ansicht (1717 x 916).
+   Was hier steht, verhindert nur, dass die Seite auf kleinen Formaten
+   zerfaellt. Mobile wird spaeter richtig gebaut — bis dahin hier nichts
+   ausbauen.
+
+   --u schrumpft auch mit der Hoehe. Auf flachen Landscape-Formaten wuerde
+   der Text sonst unter 9px fallen, deshalb harte Untergrenzen — nicht per
+   Breiten-Media-Query, die greift dort naemlich nicht.
+   ========================================================================== */
+
+.status {
+  font-size: max(calc(24.5 * var(--u)), 12px);
+}
+
+.lede {
+  font-size: max(calc(20 * var(--u)), 12.5px);
+  line-height: max(calc(30 * var(--u)), 1.7em);
+}
+
+/* Hochkant braucht die Statuszeile keine Sonderbehandlung: mit der normalen
+   Laufweite von .30em kommt sie auf rund 68 % der Viewportbreite und ist damit
+   so breit wie die Wortmarke — genau wie im Vorschaubild. Die frueher hier
+   stehende Verengung auf .22em hat sie auf 56 % gedrueckt. */

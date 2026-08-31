@@ -1,0 +1,64 @@
+# AJM Solutions — Apache-Konfiguration (IONOS Webhosting)
+# Liegt im Deploy-Root und gilt fuer alles darunter.
+
+# ---------------------------------------------------------------- HTTPS ----
+# Erst aktivieren, wenn das Zertifikat in IONOS ausgestellt ist, sonst
+# schickt der Server in eine Endlosschleife.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ------------------------------------------------------------ MIME-Typen ----
+<IfModule mod_mime.c>
+  AddType image/webp                 .webp
+  AddType font/woff2                 .woff2
+  AddType application/manifest+json  .webmanifest
+  AddType image/svg+xml              .svg
+</IfModule>
+
+# ----------------------------------------------------------- Kompression ----
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE application/manifest+json image/svg+xml
+  # WebP, PNG, JPEG und WOFF2 sind bereits komprimiert — nicht doppelt packen.
+</IfModule>
+
+# ------------------------------------------------------------- Caching ------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  # Bilder und Schriften sind versionslos, aendern sich aber selten.
+  # Bei einem Austausch den Dateinamen aendern, sonst haelt der Cache dagegen.
+  ExpiresByType image/webp        "access plus 6 months"
+  ExpiresByType image/png         "access plus 6 months"
+  ExpiresByType image/jpeg        "access plus 6 months"
+  ExpiresByType font/woff2        "access plus 1 year"
+  ExpiresByType text/css          "access plus 1 week"
+  # HTML nie hart cachen, sonst sehen Besucher nach dem Launch die alte Seite.
+  ExpiresByType text/html         "access plus 0 seconds"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(webp|png|jpe?g|woff2)$">
+    Header set Cache-Control "public, max-age=15552000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+
+  # -------------------------------------------------------- Sicherheit ----
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  # Die Seite laedt ausschliesslich eigene Dateien — kein externer Aufruf.
+  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'self'"
+</IfModule>
+
+# --------------------------------------------------------------- Sonstiges --
+Options -Indexes
+DirectoryIndex index.html
+
+ErrorDocument 404 /index.html

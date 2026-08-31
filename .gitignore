@@ -1,0 +1,17 @@
+# Betriebssystem
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editoren
+.vscode/
+.idea/
+*.swp
+
+# Node (das Projekt hat keine Abhaengigkeiten, aber tools/ laeuft unter Node)
+node_modules/
+npm-debug.log*
+
+# Arbeitsdateien
+*.tmp
+/tmp/
