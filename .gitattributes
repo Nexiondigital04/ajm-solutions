@@ -1,0 +1,9 @@
+# Im Repo immer LF, damit die Dateien auf dem Linux-Webspace sauber ankommen.
+* text=auto eol=lf
+
+# Binaerdateien nicht anfassen
+*.png  binary
+*.jpg  binary
+*.webp binary
+*.woff2 binary
+*.ai   binary
