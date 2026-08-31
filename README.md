@@ -8,22 +8,28 @@ Kein Build-Schritt, keine Abhaengigkeiten — HTML, CSS und die Original-Assets.
 ```
 ajm-solutions/
 ├─ README.md
-├─ serve.mjs                  kleiner Dev-Server ohne Abhaengigkeiten
-├─ site/                      Deploy-Root — genau dieser Ordner wird hochgeladen
+├─ serve.mjs                    kleiner Dev-Server ohne Abhaengigkeiten
+├─ site/                        Deploy-Root — nur dieser Ordner wird hochgeladen
 │  ├─ index.html
+│  ├─ .htaccess                 Apache: HTTPS, Caching, Kompression, CSP
+│  ├─ robots.txt / sitemap.xml
+│  ├─ site.webmanifest
 │  └─ assets/
 │     ├─ css/styles.css
+│     ├─ fonts/                 Inter 300, Orbitron 500 — selbst gehostet
 │     └─ img/
-│        ├─ bg.png            Original-Hintergrund quer, unveraendert
-│        ├─ bg-mobile.png     Original-Hintergrund hoch, unveraendert
-│        ├─ ajm-mark.png      Signet, aus dem Logo freigestellt
-│        ├─ ajm-mark-512.png  Favicon / Social
-│        └─ ajm-wordmark.png  Schriftzug, fuer dunklen Grund umgefaerbt
+│        ├─ bg.webp  / bg.png          Hintergrund quer  (WebP + Rueckfallebene)
+│        ├─ bg-mobile.webp / .png      Hintergrund hoch  (WebP + Rueckfallebene)
+│        ├─ ajm-mark.png               Signet, aus dem Logo freigestellt
+│        ├─ ajm-wordmark.png           Schriftzug, fuer dunklen Grund umgefaerbt
+│        ├─ icon-32/180/512.png        Favicon, Apple-Touch, Manifest
+│        └─ og-image.jpg               1200 × 630 fuer Social-Vorschau
 ├─ docs/
 │  ├─ referenz-endergebnis.png   Design-Vorlage Desktop
 │  ├─ referenz-mobile.png        Design-Vorlage Hochkant
-│  └─ quellen/                   Originaldateien (Logo .ai/.png, Hintergrund)
-└─ tools/                     Node-Skripte fuer Assets und Abgleich
+│  ├─ referenz-schweif.png       Design-Vorlage Energy Trail
+│  └─ quellen/                   Originaldateien (Logo .ai/.svg/.png, Hintergruende)
+└─ tools/                        Node-Skripte fuer Assets und Abgleich
 ```
 
 ## Lokal ansehen
@@ -34,6 +40,47 @@ node serve.mjs
 
 Danach http://localhost:4180 oeffnen (`PORT=… node serve.mjs` fuer einen anderen Port).
 `site/index.html` laesst sich auch direkt im Browser oeffnen.
+
+## Veroeffentlichen
+
+**Deploy-Root ist `site/`** — nur dieser Ordner gehoert auf den Webspace, nicht
+das Repo-Wurzelverzeichnis. `docs/` und `tools/` sind Arbeitsmaterial.
+
+Kein Build-Schritt: die Dateien werden unveraendert ausgeliefert.
+
+### GitHub
+
+```bash
+git remote add origin git@github.com:<konto>/ajm-solutions.git
+git push -u origin main
+```
+
+### IONOS
+
+Zwei Wege, je nach Vertrag:
+
+**Deploy Now** (GitHub-Anbindung) — im IONOS-Assistenten das Repo auswaehlen.
+Als Projekttyp „statische Seite" ohne Build-Kommando angeben und als
+Veroeffentlichungsverzeichnis `site` setzen. Der Assistent legt dabei selbst
+eine `.ionos.yaml` im Repo an; die ist hier bewusst nicht vorbereitet, weil ihr
+Aufbau von der gewaehlten Projektart abhaengt.
+
+**Klassisches Webhosting** (SFTP) — den *Inhalt* von `site/` nach
+`/` bzw. in das eingestellte Dokumentenverzeichnis hochladen. Die `.htaccess`
+liegt bereits darin und muss mit hoch; versteckte Dateien im FTP-Programm
+einblenden, sonst bleibt sie liegen.
+
+### Nach dem ersten Aufschalten
+
+1. In `site/.htaccess` ist die **HTTPS-Weiterleitung aktiv**. Sie funktioniert
+   erst, wenn das IONOS-Zertifikat ausgestellt ist — vorher den Block
+   auskommentieren, sonst laeuft die Seite in eine Weiterleitungsschleife.
+2. In `site/robots.txt` und `site/sitemap.xml` steht `ajm-solutions.com` als
+   Domain. Falls die Seite anders erreichbar ist, dort anpassen.
+3. Die `Content-Security-Policy` in der `.htaccess` erlaubt ausschliesslich
+   eigene Dateien und verbietet JavaScript komplett. Wird spaeter etwas
+   eingebunden — Analytics, Schriften, ein Formular — muss sie erweitert
+   werden, sonst blockiert der Browser es kommentarlos.
 
 ## Woher die Assets kommen
 
@@ -108,13 +155,35 @@ gezogen als das Original-Artwork. Hier steht es unverzerrt, ist also minimal
 schmaler als in der Vorlage. Wenn es exakt dem Bild entsprechen soll:
 `.mark img { width: calc(432 * var(--u)); height: calc(366 * var(--u)); }`.
 
-## Schriften
+## Schriften und Seitengewicht
 
-Die Wortmarke ist ein Bild, braucht also keine Schrift. Fuer die Statuszeile
-kommt Orbitron zum Einsatz, fuer den Fliesstext Inter — beide ueber Google Fonts.
+Die Wortmarke ist ein Bild und braucht keine Schrift. Nur zwei Schnitte werden
+tatsaechlich benutzt: **Orbitron 500** fuer die Statuszeile, **Inter 300** fuer
+den Fliesstext. Beide liegen selbst gehostet in `site/assets/fonts/` — die
+Seite ruft zur Laufzeit **nichts Externes** auf, es geht also auch ohne
+Einwilligung keine Besucher-IP an Google.
 
-Fuer Offline-/DSGVO-Betrieb: `.woff2` nach `site/assets/fonts/` legen,
-`@font-face` in `styles.css` ergaenzen und den `<link>` in `index.html` entfernen.
+Neu holen (etwa fuer weitere Schnitte):
+
+```bash
+node tools/fetch-fonts.mjs
+```
+
+Die Hintergruende liegen zusaetzlich als WebP vor und werden per `image-set()`
+mit PNG-Rueckfallebene eingebunden — 1227 kB werden so zu 41 kB, bei einer
+mittleren Abweichung von 0,8/255 gegenueber dem Original.
+
+```bash
+node tools/weight.mjs
+```
+
+| | |
+|---|---|
+| Desktop-Erstbesuch | **142 kB** |
+| alle Dateien im Deploy-Root | 3,1 MB (davon 2,8 MB PNG-Rueckfallebene) |
+
+Die PNGs werden praktisch nie ausgeliefert; sie greifen nur, wenn ein Browser
+kein WebP kann.
 
 ## Farben
 
@@ -261,11 +330,19 @@ die ruhende Kante bleibt — sie bewegt sich ohnehin nicht.
 
 Das Logo selbst ist unveraendert — dieselbe `ajm-mark.png`, ohne Transformation.
 
-Offen — nicht angefangen, bewusst zurueckgestellt:
+Bewusst nicht gebaut — beides steht im Mobil-Vorschaubild, setzt aber Inhalte
+voraus, die es noch nicht gibt:
 
-- [ ] Schriften selbst hosten statt ueber Google Fonts (DSGVO)
-- [ ] Git-Repo anlegen
-- [ ] Favicon-Varianten und `og:image` als PNG in Zielgroesse
+- Kopfzeile mit kleinem Logo und Burger-Menue (ein Menue ohne Zielseiten)
+- Pfeil nach unten am unteren Rand (deutet Scroll-Inhalt an, die Seite ist einseitig)
+
+Vor dem Livegang zu entscheiden:
+
+- Impressum und Datenschutzerklaerung. Fuer eine reine Baustellenseite ohne
+  Datenerhebung ist die Rechtslage nicht eindeutig; die Seite laedt nichts
+  Externes und setzt keine Cookies, ein Impressum ist bei geschaeftlichem
+  Auftritt aber ueblich.
+- Domain in `robots.txt` und `sitemap.xml` bestaetigen.
 
 Hinweis zum Pruefen: Headless-Chrome erzwingt eine Mindest-Fensterbreite —
 Screenshots schmaler Viewports sind dort irrefuehrend. Solche Formate im echten
